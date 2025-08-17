@@ -1,8 +1,8 @@
-# AutoRegress: Automated Regression Benchmarking Tool 🚀
+# AutoRegress: Automated Regression Benchmarking Tool
 
 **AutoRegress** is a user-friendly web application designed to simplify the process of data cleaning and regression model benchmarking. Upload your dataset, clean it with intuitive tools, and instantly compare the performance of nine different regression models to find the best fit for your data.
 
-## 📋 Key Features
+## Key Features
 
 * **Easy Data Upload**: Supports both **CSV** and **XLSX** file formats with a simple drag-and-drop interface.
 * **Data Quality Insights**: Automatically generates a report on missing values and potential outliers in your dataset.
@@ -18,7 +18,7 @@
 
 ---
 
-## 🛠️ Built With
+## 🛠Built With
 
 * **Backend**: [Flask](https://flask.palletsprojects.com/)
 * **Frontend**: [Tailwind CSS](https://tailwindcss.com/)
@@ -27,7 +27,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 To get a local copy up and running, follow these simple steps.
 
@@ -72,7 +72,7 @@ This will launch a desktop window with the application running inside.
 
 -----
 
-## 📖 Usage
+## Usage
 
 1.  **Upload Your Data**: Drag and drop your CSV or XLSX file into the upload area on the main page.
 2.  **Clean Your Data**:
