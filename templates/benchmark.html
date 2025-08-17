@@ -1,4 +1,3 @@
-<!-- templates/benchmark.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,42 +51,42 @@
         .modal-overlay.visible .modal-content {
             transform: scale(1);
         }
+        #loading-modal {
+            opacity: 1;
+            visibility: visible;
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md">
+    <nav class="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
         <div class="container mx-auto px-4 md:px-8">
             <div class="flex justify-between items-center py-4">
-                <!-- Logo -->
                 <div class="flex items-center">
                     <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
-                <!-- Title -->
                 <div class="text-xl font-bold text-gray-800">
-                    Regression Benchmark
+                    AutoRegress
                 </div>
-                <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
                     <button id="info-button" class="text-gray-500 hover:text-indigo-600">
                         <i class="fas fa-info-circle fa-lg"></i>
                     </button>
-                    <a href="/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Start New Analysis</a>
+                    <a href="/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm">New Dataset</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl mt-24">
         <div class="bg-white rounded-lg shadow-lg p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Benchmark Results</h1>
             <p class="text-gray-600 mb-6">
-                Comparing model performance for **Regression**. Lower error metrics (MSE, RMSE, MAE, etc.) are better. Higher R-squared and Explained Variance are better.
+                Comparing model performance for Regression. Lower error metrics (MSE, RMSE, MAE, etc.) are better. Higher R-squared and Explained Variance are better.
             </p>
 
-            <!-- Download Button -->
             <div class="flex justify-end mb-4">
                 <button id="download-csv" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
                     Download CSV
@@ -145,22 +144,20 @@
         </div>
     </div>
 
-    <!-- Floating Footer -->
     <div class="fixed bottom-4 left-4 bg-white shadow-lg rounded-lg p-3">
         <div class="flex items-center space-x-4">
             <p class="text-sm text-gray-700 font-medium">Built by Priyanuj Boruah</p>
             <div class="flex space-x-3">
-                <a href="#" target="_blank" class="text-gray-500 hover:text-gray-900">
+                <a href="https://github.com/PriyanujBoruah/AutoRegress" target="_blank" class="text-gray-500 hover:text-gray-900">
                     <i class="fab fa-github fa-lg"></i>
                 </a>
-                <a href="#" target="_blank" class="text-gray-500 hover:text-blue-700">
+                <a href="https://www.linkedin.com/in/priyanuj-boruah/" target="_blank" class="text-gray-500 hover:text-blue-700">
                     <i class="fab fa-linkedin fa-lg"></i>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Info Modal -->
     <div id="info-modal" class="modal-overlay">
         <div class="modal-content max-h-[80vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -191,6 +188,14 @@
                     </dl>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="loading-modal" class="modal-overlay">
+        <div class="modal-content text-center" style="max-width: 400px;">
+            <i class="fas fa-spinner fa-spin fa-3x text-indigo-600"></i>
+            <p class="mt-4 text-lg font-semibold text-gray-800">Working on it...</p>
+            <p class="text-sm text-gray-600">The models are being benchmarked. This might take a moment.</p>
         </div>
     </div>
 
@@ -230,6 +235,18 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        });
+
+        // --- Loading Modal ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const benchmarkForm = document.querySelector('form[action*="benchmark"]');
+            const loadingModal = document.getElementById('loading-modal');
+
+            if (benchmarkForm) {
+                benchmarkForm.addEventListener('submit', function() {
+                    loadingModal.style.display = 'flex';
+                });
+            }
         });
     </script>
 </body>
