@@ -1,0 +1,236 @@
+<!-- templates/benchmark.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .highlight-best {
+            background-color: #dcfce7; /* green-100 */
+            color: #166534; /* green-800 */
+            font-weight: 600;
+        }
+        .highlight-worst {
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-800 */
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 600px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <!-- Title -->
+                <div class="text-xl font-bold text-gray-800">
+                    Regression Benchmark
+                </div>
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-4">
+                    <button id="info-button" class="text-gray-500 hover:text-indigo-600">
+                        <i class="fas fa-info-circle fa-lg"></i>
+                    </button>
+                    <a href="/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Start New Analysis</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Benchmark Results</h1>
+            <p class="text-gray-600 mb-6">
+                Comparing model performance for **Regression**. Lower error metrics (MSE, RMSE, MAE, etc.) are better. Higher R-squared and Explained Variance are better.
+            </p>
+
+            <!-- Download Button -->
+            <div class="flex justify-end mb-4">
+                <button id="download-csv" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
+                    Download CSV
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table id="benchmark-table" class="min-w-full bg-white">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Metric</th>
+                            {% for model_name in results.keys() %}
+                            <th class="text-center py-3 px-4 uppercase font-semibold text-sm">{{ model_name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        {% set metrics_order = ['MSE', 'RMSE', 'MAE', 'R-squared', 'Explained Variance', 'MSLE', 'Median Absolute Error', 'Max Error'] %}
+                        {% for metric in metrics_order %}
+                        <tr class="border-b">
+                            <td class="py-3 px-4 font-bold">{{ metric }}</td>
+                            {% for model_name, model_metrics in results.items() %}
+                            <td class="text-center py-3 px-4 {% if best_scores[metric] == model_name %}highlight-best{% elif worst_scores[metric] == model_name %}highlight-worst{% endif %}">
+                                {% if model_metrics[metric] is number %}
+                                    {{ "%.4g"|format(model_metrics[metric]) }}
+                                {% else %}
+                                    {{ model_metrics[metric] }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-12 border-t pt-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Re-run with a Different Target</h2>
+                <p class="text-gray-600 mb-6">Select a different numerical column as the target and run the benchmark again on the same cleaned data.</p>
+                <form action="{{ url_for('benchmark', filename=filename) }}" method="post" class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="w-full md:w-1/3">
+                        <label for="target_column" class="block text-sm font-medium text-gray-700">Select Target Column</label>
+                        <select id="target_column" name="target_column" class="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md">
+                            {% for col in numerical_columns %}
+                            <option>{{col}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <label class="block text-sm font-medium text-gray-700 invisible">Submit</label>
+                        <button type="submit" class="w-full mt-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">Re-run Benchmark</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Footer -->
+    <div class="fixed bottom-4 left-4 bg-white shadow-lg rounded-lg p-3">
+        <div class="flex items-center space-x-4">
+            <p class="text-sm text-gray-700 font-medium">Built by Priyanuj Boruah</p>
+            <div class="flex space-x-3">
+                <a href="#" target="_blank" class="text-gray-500 hover:text-gray-900">
+                    <i class="fab fa-github fa-lg"></i>
+                </a>
+                <a href="#" target="_blank" class="text-gray-500 hover:text-blue-700">
+                    <i class="fab fa-linkedin fa-lg"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl leading-6 font-bold text-gray-900">Model & Metric Descriptions</h3>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-800">Models</h4>
+                    <dl class="space-y-3">
+                        {% for name, desc in model_descriptions.items() %}
+                        <div>
+                            <dt class="font-bold text-gray-900">{{ name }}</dt>
+                            <dd class="text-sm text-gray-600">{{ desc }}</dd>
+                        </div>
+                        {% endfor %}
+                    </dl>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-800">Metrics</h4>
+                     <dl class="space-y-3">
+                        {% for name, desc in metric_descriptions.items() %}
+                        <div>
+                            <dt class="font-bold text-gray-900">{{ name }}</dt>
+                            <dd class="text-sm text-gray-600">{{ desc }}</dd>
+                        </div>
+                        {% endfor %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Modal ---
+        const infoButton = document.getElementById('info-button');
+        const infoModal = document.getElementById('info-modal');
+        const modalCloseButton = document.getElementById('modal-close');
+
+        infoButton.addEventListener('click', () => infoModal.classList.add('visible'));
+        modalCloseButton.addEventListener('click', () => infoModal.classList.remove('visible'));
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.classList.remove('visible');
+            }
+        });
+
+        // --- CSV Download ---
+        document.getElementById('download-csv').addEventListener('click', function() {
+            const table = document.getElementById('benchmark-table');
+            let csv = [];
+            for (let i = 0; i < table.rows.length; i++) {
+                let row = [], cols = table.rows[i].querySelectorAll('td, th');
+                for (let j = 0; j < cols.length; j++) {
+                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').trim();
+                    data = `"${data}"`;
+                    row.push(data);
+                }
+                csv.push(row.join(','));
+            }
+            
+            const csvContent = "data:text/csv;charset=utf-8," + csv.join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'benchmark_results.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
