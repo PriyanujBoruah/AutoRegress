@@ -1,4 +1,4 @@
-# AutoRegress: Automatic Regression Benchmarking Tool
+# AutoRegress: Automated Regression Model Benchmarking Tool
 
 **AutoRegress** is a user-friendly web application designed to simplify the process of data cleaning and regression model benchmarking. Upload your dataset, clean it with intuitive tools, and instantly compare the performance of nine different regression models to find the best fit for your data.
 
